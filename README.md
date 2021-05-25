@@ -5,13 +5,16 @@ It is a wrapper for 3D unit vector that are symmetric. It means that **x**=**-x*
 
 ## Installation
 
-You should clone the environnement
+You should clone the environnement.
+
 `git clone https://github.com/ThomasChauve/xarray_uvecs`
 
-Go in the folder
+Go in the folder.
+
 `cd xarray_uvec`
 
 Use pip to install it.
+
 `pip install .`
 
 ## Overview
