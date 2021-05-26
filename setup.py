@@ -12,7 +12,7 @@ from shutil import rmtree
 from setuptools import find_packages, setup, Command
 
 # Package meta-data.
-NAME = 'xarray_uvecs'
+NAME = 'xarrayuvecs'
 DESCRIPTION = 'Tools to work on unit vector that are symmetric (i.e. x is equivalent to -x)'
 URL = 'https://github.com/ThomasChauve/xarray_uvecs'
 EMAIL = 'thomas.chauve@univ-grenoble-alpes.fr'
