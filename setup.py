@@ -21,9 +21,9 @@ REQUIRES_PYTHON = '>=3.7'
 VERSION = '0.1'
 
 # What packages are required for this module to be executed?
-REQUIRED = [
-    'xarray','numpy','matplotlib'
-]
+#REQUIRED = [
+#    'xarray','numpy','matplotlib'
+#]
 
 # What packages are optional?
 EXTRAS = {
