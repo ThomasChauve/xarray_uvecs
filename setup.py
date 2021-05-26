@@ -17,7 +17,7 @@ DESCRIPTION = 'Tools to work on unit vector that are symmetric (i.e. x is equiva
 URL = 'https://github.com/ThomasChauve/xarray_uvecs'
 EMAIL = 'thomas.chauve@univ-grenoble-alpes.fr'
 AUTHOR = 'Thomas Chauve'
-REQUIRES_PYTHON = '>=3.9'
+REQUIRES_PYTHON = '>=3.7'
 VERSION = '0.1'
 
 # What packages are required for this module to be executed?
