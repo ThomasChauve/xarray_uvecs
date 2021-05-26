@@ -1,8 +1,8 @@
 '''
 This is an object to take care of unit vector
 '''
-import xarray_uvecs.uniform_dist
-import xarray_uvecs.lut2d
+import xarrayuvecs.uniform_dist
+import xarrayuvecs.lut2d
 
 import datetime
 import xarray as xr
