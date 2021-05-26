@@ -1,8 +1,8 @@
 '''
 This is an object to take care of unit vector
 '''
-import uvecs.uniform_dist
-import uvecs.lut2d
+import xarray_uvecs.uniform_dist
+import xarray_uvecs.lut2d
 
 import datetime
 import xarray as xr
@@ -49,7 +49,10 @@ class uvecs(object):
         :return out: phi1 and phi, out[n,m,0]=phi1, out[n,m,1]=phi
         :rtype out: np.array
         '''
-        return np.moveaxis(np.array([np.mod(self._obj[:,:,0]+np.pi/2.,2*np.pi),self._obj[:,:,1]]),0,-1)
+        BE=np.moveaxis(np.array([np.mod(self._obj[:,:,0]+np.pi/2.,2*np.pi),self._obj[:,:,1]]),0,-1)
+        
+        return xr.DataArray(BE,dims=['y','x','vbe'])
+
 
     def xyz(self):
         '''
@@ -57,7 +60,9 @@ class uvecs(object):
         :return out: out[n,m,0]=x, out[n,m,1]=u , out[n,m,2]=z
         :rtype out: np.array
         '''
-        return np.moveaxis(np.array([np.cos(self._obj[:,:,0])*np.sin(self._obj[:,:,1]),np.sin(self._obj[:,:,0])*np.sin(self._obj[:,:,1]),np.cos(self._obj[:,:,1])]),0,-1)
+        XYZ=np.moveaxis(np.array([np.cos(self._obj[:,:,0])*np.sin(self._obj[:,:,1]),np.sin(self._obj[:,:,0])*np.sin(self._obj[:,:,1]),np.cos(self._obj[:,:,1])]),0,-1)
+
+        return xr.DataArray(XYZ,dims=['y','x','vc'])
     
 #-----------------------------------colormap function-------------------------------------
     def calc_colormap(self,**kwargs):
