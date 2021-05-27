@@ -1,8 +1,8 @@
 '''
 This is an object to take care of unit vector
 '''
-import xarrayuvecs.uniform_dist
-import xarrayuvecs.lut2d
+from xarrayuvecs.uniform_dist import unidist
+import xarrayuvecs.lut2d as lut2d
 
 import datetime
 import xarray as xr
@@ -72,28 +72,20 @@ class uvecs(object):
         :type nlut: int
         :param semi: colorbar option
         '''
-        rlut=lut2d.lut(**kwargs)
+        rlut=lut2d.lut(circle=False,**kwargs)
         nlut=np.shape(rlut)[0]
         
         XX=np.int32((nlut-1)/2*np.multiply(np.sin(self._obj[:,:,1]),-np.sin(self._obj[:,:,0]))+(nlut-1)/2)
         YY=np.int32((nlut-1)/2*np.multiply(np.sin(self._obj[:,:,1]),np.cos(self._obj[:,:,0]))+(nlut-1)/2)
         
         id=XX<0
-        print(id.shape)
         XX[id]=0
         YY[id]=0
         
         idx,idy=np.where(id==True)
         img=rlut[XX,YY]
         img[idx,idy,:]=np.array([255,255,255])
-        return img
-    
-    def colormap(self,semi=False,nlut=512,**kwargs):
-        '''
-        Plot the colormap
-        '''
-        img=self.calc_colormap(semi=semi,nx=nlut,circle=False)
-        plt.imshow(img,**kwargs)
+        return xr.DataArray(img,dims=['y','x','img'])
 #--------------------------------------------------------------------------------------------
     def OT2nd(self):
         '''
@@ -107,9 +99,9 @@ class uvecs(object):
         .. note:: eigen value w[i] is associate to eigen vector v[:,i] 
         '''
         u_xyz=self.xyz()
-        ux=np.concatenate([u_xyz[:,:,0].flatten(),-u_xyz[:,:,0].flatten()])
-        uy=np.concatenate([u_xyz[:,:,1].flatten(),-u_xyz[:,:,1].flatten()])
-        uz=np.concatenate([u_xyz[:,:,2].flatten(),-u_xyz[:,:,2].flatten()])
+        ux=np.concatenate([np.array(u_xyz[:,:,0]).flatten(),-np.array(u_xyz[:,:,0]).flatten()])
+        uy=np.concatenate([np.array(u_xyz[:,:,1]).flatten(),-np.array(u_xyz[:,:,1]).flatten()])
+        uz=np.concatenate([np.array(u_xyz[:,:,2]).flatten(),-np.array(u_xyz[:,:,2]).flatten()])
         
         
         a11 = np.float32(np.nanmean(np.float128(np.multiply(ux,ux))))
@@ -127,14 +119,14 @@ class uvecs(object):
         return eigvalue[idx],eigvector[:,idx]
 
 #--------------------------------------------------------------------------------------------
-    def plotPDF(self,nbr=10000,bw=0.2,projz=1,plotOT=True,angle=np.array([30.,60.]),cline=10,**kwargs):
+    def plotODF(self,nbr=10000,bw=0.2,projz=1,plotOT=True,angle=np.array([30.,60.]),cline=10,**kwargs):
         
         #compute phi theta under the nice form for kde fit
         u_xyz=self.xyz()
         
-        ux=np.concatenate([u_xyz[:,:,0].flatten(),-u_xyz[:,:,0].flatten()])
-        uy=np.concatenate([u_xyz[:,:,1].flatten(),-u_xyz[:,:,1].flatten()])
-        uz=np.concatenate([u_xyz[:,:,2].flatten(),-u_xyz[:,:,2].flatten()])
+        ux=np.concatenate([np.array(u_xyz[:,:,0]).flatten(),-np.array(u_xyz[:,:,0]).flatten()])
+        uy=np.concatenate([np.array(u_xyz[:,:,1]).flatten(),-np.array(u_xyz[:,:,1]).flatten()])
+        uz=np.concatenate([np.array(u_xyz[:,:,2]).flatten(),-np.array(u_xyz[:,:,2]).flatten()])
         
         ux=ux[~np.isnan(ux)]
         uy=uy[~np.isnan(uy)]
@@ -159,7 +151,7 @@ class uvecs(object):
         kde.fit(np.transpose(np.array([phi,theta])))
         
         # Prepare the plot
-        val=uniform_dist.unidist
+        val=unidist
         dim=int(np.size(val)/3)
         vs=val.reshape([dim,3])
         id=np.where(vs[:,2]>0)
