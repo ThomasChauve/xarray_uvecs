@@ -134,12 +134,15 @@ class uvecs(object):
         
         
         if nbr!=0:
+            if nbr>len(ux):
+                nbr=len(ux)
+                
             rng = np.random.default_rng()
             numbers = rng.choice(len(ux), size=nbr, replace=False)
             
-        ux=ux[numbers]
-        uy=uy[numbers]
-        uz=uz[numbers]
+            ux=ux[numbers]
+            uy=uy[numbers]
+            uz=uz[numbers]
                         
         
         phi=np.arccos(uz)-np.pi/2.
