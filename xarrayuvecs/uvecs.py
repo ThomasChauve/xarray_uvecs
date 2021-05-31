@@ -117,7 +117,46 @@ class uvecs(object):
         idx = eigvalue.argsort()[::-1]
            
         return eigvalue[idx],eigvector[:,idx]
-
+#--------------------------------------------------------------------------------------------
+    def misorientation_profile(self,xx,yy,degre=True,method="nearest",**kwargs):
+        '''
+        Extract value for xx,yy
+        :param xx: x coordinate
+        :type xx: np.array()
+        :param yy: y coordinate
+        :type yy: np.array()
+        :param degre: Do you want the angle in degree (default:True)
+        :type degre: bool
+        :param **kwargs: xr.sel
+        '''
+        ori=self._obj.sel(x=xx,y=yy, method=method,**kwargs)
+        # trasform it in numpy array in cartesien coordinate
+        vxyz=np.array(ori.uvecs.xyz())[0]
+        # compute the misorientation to origin
+        mis2o=np.arccos(np.round(np.dot(vxyz,vxyz[0]),10))
+    
+        mis2o[np.where(mis2o>np.pi/2)]=np.pi-mis2o[np.where(mis2o>np.pi/2)]
+        # compute misorientation from previous
+        vxyzm=np.zeros(np.shape(vxyz))
+        vxyzm[:,:]=np.nan
+        vxyzm[1::,:]=vxyz[0:-1,:]
+        mis2p=np.arccos(np.round(np.diag(np.dot(vxyz,np.transpose(vxyzm))),10))
+        mis2p[np.where(mis2p>np.pi/2)]=np.pi-mis2p[np.where(mis2p>np.pi/2)]
+        #compute distance
+        d=((xx-xx[0])**2+(yy-yy[0])**2)**0.5
+        
+        if degre:
+            coeff=180/np.pi
+        else:
+            coeff=1.
+        
+        ds=xr.Dataset(
+        {
+            'mis2i': (['d'],mis2o*coeff),
+            'mis2p': (['d'],mis2p*coeff),
+        },
+        coords={'d':d})
+        return ds,vxyz
 #--------------------------------------------------------------------------------------------
     def plotODF(self,nbr=10000,bw=0.2,projz=1,plotOT=True,angle=np.array([30.,60.]),cline=10,**kwargs):
         
@@ -255,4 +294,3 @@ class uvecs(object):
                     
                 plt.plot(xxv,yyv,'sk',markersize=8)
                 plt.text(xxv+0.04, yyv+0.04,str(round(eigvalue[i],2)))
-        
