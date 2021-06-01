@@ -10,6 +10,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.tri as tri
 from sklearn.neighbors import KernelDensity
+import scipy
 
 @xr.register_dataarray_accessor("uvecs")
 
@@ -156,7 +157,82 @@ class uvecs(object):
             'mis2p': (['d'],mis2p*coeff),
         },
         coords={'d':d})
-        return ds,vxyz
+        return ds
+    
+    
+#--------------------------------------------------------------------------------------------
+    def mis_angle(self,random=False):
+        '''
+        Compute the misorientation with the neighbouring grain
+        :param random: suffle the image and compute the angle
+        :type random: bool
+
+        '''
+        phi1=np.array(self.bunge_euler())[:,:,0]
+        phi=np.array(self.bunge_euler())[:,:,1]
+
+        if random:
+            np.random.shuffle(phi1)
+            np.random.shuffle(phi)
+            phi1=phi1.flatten()
+            phi=phi.flatten()
+            phi1 = phi1[~np.isnan(phi1)]
+            phi = phi[~np.isnan(phi)]
+            dd=np.int(np.sqrt(len(phi1)))
+            phi1=phi1[0:dd**2].reshape([dd,dd])
+            phi=phi[0:dd**2].reshape([dd,dd])
+
+        mat=np.zeros([3,3])
+        mat[0,1]=1
+        phi_a=scipy.signal.convolve2d(phi,mat,mode='same',boundary='symm')
+        phi1_a=scipy.signal.convolve2d(phi1,mat,mode='same',boundary='symm')
+
+        mat=np.zeros([3,3])
+        mat[1,0]=1
+        phi_b=scipy.signal.convolve2d(phi,mat,mode='same',boundary='symm')
+        phi1_b=scipy.signal.convolve2d(phi1,mat,mode='same',boundary='symm')
+
+
+        mat=np.zeros([3,3])
+        mat[1,2]=1
+        phi_c=scipy.signal.convolve2d(phi,mat,mode='same',boundary='symm')
+        phi1_c=scipy.signal.convolve2d(phi1,mat,mode='same',boundary='symm')
+
+
+        mat=np.zeros([3,3])
+        mat[2,1]=1
+        phi_d=scipy.signal.convolve2d(phi,mat,mode='same',boundary='symm')
+        phi1_d=scipy.signal.convolve2d(phi1,mat,mode='same',boundary='symm')
+
+        phi1_s=[phi1_a,phi1_b,phi1_c,phi1_d]
+        phi_s=[phi_a,phi_b,phi_c,phi_d]
+        if random:
+            tot=np.zeros([dd,dd,4])
+        else:
+            tot=np.zeros([len(self._obj.y),len(self._obj.x),4])
+        
+        for i in range(4):
+            nphi1=phi1_s[i]
+            nphi=phi_s[i]
+            res=np.arccos(np.round(np.sin(phi1)*np.sin(nphi1)*np.sin(phi)*np.sin(nphi)+np.cos(phi1)*np.cos(nphi1)*np.sin(phi)*np.sin(nphi)+np.cos(phi)*np.cos(nphi),5))
+            #put everything between 0  and pi/2 because c=-c
+            id=np.where(res>np.pi/2)
+            res[id]=np.pi-res[id] 
+
+            res[0,:] = np.nan  # delete first row 
+            res[-1,:] = np.nan
+            res[:,0] = np.nan
+            res[:,-1] = np.nan
+            tot[:,:,i]=res
+            
+
+        if random:
+            tot=tot.flatten()
+            tot=tot[~np.isnan(tot)]
+        else:
+            tot=xr.DataArray(tot,dims=['y','x','misAngle'])
+
+        return tot
 #--------------------------------------------------------------------------------------------
     def plotODF(self,nbr=10000,bw=0.2,projz=1,plotOT=True,angle=np.array([30.,60.]),cline=10,**kwargs):
         
