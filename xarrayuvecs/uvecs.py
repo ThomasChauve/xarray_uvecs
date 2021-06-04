@@ -52,7 +52,7 @@ class uvecs(object):
         '''
         BE=np.moveaxis(np.array([np.mod(self._obj[:,:,0]+np.pi/2.,2*np.pi),self._obj[:,:,1]]),0,-1)
         
-        return xr.DataArray(BE,dims=['y','x','vbe'])
+        return xr.DataArray(BE,dims=[self._obj.coords.dims[0],self._obj.coords.dims[1],'vbe'])
 
 
     def xyz(self):
@@ -63,7 +63,7 @@ class uvecs(object):
         '''
         XYZ=np.moveaxis(np.array([np.cos(self._obj[:,:,0])*np.sin(self._obj[:,:,1]),np.sin(self._obj[:,:,0])*np.sin(self._obj[:,:,1]),np.cos(self._obj[:,:,1])]),0,-1)
 
-        return xr.DataArray(XYZ,dims=['y','x','vc'])
+        return xr.DataArray(XYZ,dims=[self._obj.coords.dims[0],self._obj.coords.dims[1],'vc'])
     
 #-----------------------------------colormap function-------------------------------------
     def calc_colormap(self,**kwargs):
@@ -86,7 +86,7 @@ class uvecs(object):
         idx,idy=np.where(id==True)
         img=rlut[XX,YY]
         img[idx,idy,:]=np.array([255,255,255])
-        return xr.DataArray(img,dims=['y','x','img'])
+        return xr.DataArray(img,dims=[self._obj.coords.dims[0],self._obj.coords.dims[1],'img'])
 #--------------------------------------------------------------------------------------------
     def OT2nd(self):
         '''
@@ -230,7 +230,7 @@ class uvecs(object):
             tot=tot.flatten()
             tot=tot[~np.isnan(tot)]
         else:
-            tot=xr.DataArray(tot,dims=['y','x','misAngle'])
+            tot=xr.DataArray(tot,dims=[self._obj.coords.dims[0],self._obj.coords.dims[1],'misAngle'])
 
         return tot
 #--------------------------------------------------------------------------------------------
