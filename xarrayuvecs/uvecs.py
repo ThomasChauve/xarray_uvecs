@@ -370,3 +370,34 @@ class uvecs(object):
                     
                 plt.plot(xxv,yyv,'sk',markersize=8)
                 plt.text(xxv+0.04, yyv+0.04,str(round(eigvalue[i],2)))
+            
+#-------------------------------------------------------------------------------------------            
+    def calc_schmid(self,axis):
+        '''
+        Compute the schimd sc=abs(cos(a)sin(a)) where a is the angle between c and axis
+        :param axis: axis from which you want to compute the schimd factor in cartesien coordinate (X,Y,Z)
+        :type axis: np.array
+        '''
+
+        ori=self.xyz()
+        angle=np.arccos(np.sum(ori*axis,axis=-1))
+        schmid=np.abs(np.cos(angle)*np.sin(angle))
+
+        return schmid
+    
+#--------------------------------------------------------------------------------------------
+    def inner_angle(self, other):
+        '''
+        Compute the inner angle between to uvecs DataArray
+        :param other: DataArray of same dimention than self and compatible with uvec
+        :param other: xr.DataArray
+        :return:
+        :rtype: xr.DataArray
+        '''
+        o1=self.xyz()
+        o2=other.uvecs.xyz()
+        angle=np.array(np.arccos(np.sum(o1*o2,axis=-1)))
+        id=np.where(angle>np.pi/2)
+        angle[id]=np.pi-angle[id]
+        
+        return xr.DataArray(angle,dims=self._obj.coords.dims[0:2])
